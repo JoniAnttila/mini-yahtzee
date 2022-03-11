@@ -7,36 +7,37 @@ import { Col, Row, Grid } from "react-native-easy-grid";
 let board = [];
 const NBR_OF_DICES = 5;
 const NBR_OF_THROWS = 3;
-const WINNING_POINTS = 23;
+const NBR_OF_TURNS = 6;
+const WINNING_POINTS = 63;
 
 const options = [
     {
         label: 'numeric-1-circle',
-        value: 1
+        value: 'dice-1'
     },
     {
         label: 'numeric-2-circle',
-        value: 2
+        value: 'dice-2'
     },
     {
         label: 'numeric-3-circle',
-        value: 3
+        value: 'dice-3'
     },
     {
         label: 'numeric-4-circle',
-        value: 4
+        value: 'dice-4'
     },
     {
         label: 'numeric-5-circle',
-        value: 5
+        value: 'dice-5'
     },
     {
         label: 'numeric-6-circle',
-        value: 6
+        value: 'dice-6'
     }
   ]
 
-const points = [
+const values = [
     {
         label: '1',
         value: 0
@@ -65,7 +66,10 @@ const points = [
 
 export default function Gameboard() {
     const [nbrOfThrowsLeft, setNbrOfThrowsLeft] = useState(NBR_OF_THROWS);
+    const [points, setPoints] = useState(0);
+    let BONUS = WINNING_POINTS - points;
     const [status, setStatus] = useState('');
+    const [isDisabled, setIsDisabled] = useState(false);
     const [selectedDices, setSelectedDices] = 
         useState(new Array(NBR_OF_DICES).fill(false));
 
@@ -94,6 +98,7 @@ export default function Gameboard() {
             setNbrOfThrowsLeft(NBR_OF_THROWS-1);
         }
         
+        
     }, [nbrOfThrowsLeft]);
 
     function getDiceColor(i) {
@@ -110,14 +115,12 @@ export default function Gameboard() {
         dices[i] = selectedDices[i] ? false : true;
         setSelectedDices(dices);
     }
-
-    function selectPoints(i) {
-        let dices = [...selectedDices];
-        dices[i] = selectedDices[i] ? false : true;
-        setSelectedDices(dices);
-    }
   
     function throwDices() {
+        /* if (nbrOfThrowsLeft === 0) {
+            setStatus('Select your points before next throw');
+            return;
+        } */
         for (let i = 0; i < NBR_OF_DICES; i++) {
             if (!selectedDices[i]) {
                 let randomNumber = Math.floor(Math.random() * 6 + 1);
@@ -143,6 +146,48 @@ export default function Gameboard() {
             setStatus('Select and throw dices again');
         }
     }
+
+    function calculatePoints(spotCount) {
+        setIsDisabled(true);
+        if (nbrOfThrowsLeft > 0) {
+            setStatus('Throw 3 times before setting points');
+            return;
+        }
+        let kerroin = 0;
+        for (let i = 0; i < 6; i++) {
+            if (board[i] == spotCount) {
+                kerroin ++;
+                console.log('kerroin', kerroin, i)
+
+            }
+        }
+
+        if (spotCount == 'dice-1') {
+            let spotValue = 1;
+            setPoints(points + kerroin * spotValue);
+            return;
+        } else if (spotCount == 'dice-2') {
+            let spotValue = 2;
+            setPoints(points + kerroin * spotValue);
+            return;
+        } else if (spotCount == 'dice-3') {
+            let spotValue = 3;
+            setPoints(points + kerroin * spotValue);
+            return;
+        } else if (spotCount == 'dice-4') {
+            let spotValue = 4;
+            setPoints(points + kerroin * spotValue);
+            return;
+        } else if (spotCount == 'dice-5') {
+            let spotValue = 5;
+            setPoints(points + kerroin * spotValue);
+            return;
+        } else {
+            let spotValue = 6;
+            setPoints(points + kerroin * spotValue);
+            return;
+        }
+    }
     return(
         <Grid style={styles.gameboard}>
             <View style={styles.gameboard}>
@@ -154,12 +199,14 @@ export default function Gameboard() {
                     onPress={() => throwDices()}>
                     <Text style={styles.buttonText}>Throw dices</Text>
                 </Pressable>
-                <Text style={styles.gameinfo}>Total: {nbrOfThrowsLeft}</Text>
-                <Text style={styles.gameinfo}>You are {nbrOfThrowsLeft} points away from bonus</Text>
+                <Text style={styles.gameinfo}>Total: {points}</Text>
+                <Text style={styles.gameinfo}>
+                    {(WINNING_POINTS > points ? 'You are ' + BONUS + ' points away from bonus' : 'You got the bonus!')}
+                </Text>
 
                 <Row style={styles.numbersRow}>
                     {
-                        points.map((item) => (
+                        values.map((item) => (
                         <Col>
                             <Text style={styles.numbers}>{item.value}</Text>
                         </Col>
@@ -171,12 +218,12 @@ export default function Gameboard() {
                     {
                         options.map((item) => (
                         <Col>
-                            <Pressable key={item.value} onPress={() => selectDice(item.value)}>
+                            <Pressable disabled={isDisabled} key={item.value} onPress={() => calculatePoints(item.value)}>
                                 <MaterialCommunityIcons
                                     name={item.label}
                                     key={item.value}
                                     size={50}
-                                    color={'steelblue'}>
+                                    color={(isDisabled ? 'black' : 'steelblue')}>
                                 </MaterialCommunityIcons>
                             </Pressable>
                         </Col>
