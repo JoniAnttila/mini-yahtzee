@@ -12,7 +12,6 @@ export default StyleSheet.create({
     flexDirection: 'row',
   },
   footer: {
-    marginTop: 20,
     backgroundColor: 'skyblue',
     flexDirection: 'row'
   },
@@ -44,6 +43,18 @@ export default StyleSheet.create({
     fontSize: 20,
     marginTop: 10
   },
+  gameinfo1: {
+    backgroundColor: '#fff',
+    fontSize: 18,
+    marginTop: 10
+  },
+  gameinfo2: {
+    backgroundColor: '#fff',
+    textAlign: 'center',
+    justifyContent: 'center',
+    fontSize: 22,
+    marginTop: 5
+  },
   row: {
     marginTop: 20,
     padding: 10
@@ -53,14 +64,13 @@ export default StyleSheet.create({
     flexDirection: "row"
   },
   button: {
-    margin: 30,
+    marginVertical: 30,
     flexDirection: "row",
     padding: 10,
     backgroundColor: "#73CED6",
     width: 150,
     borderRadius: 15,
     justifyContent: 'center',
-    alignItems: 'center'
   },
   buttonText: {
     color:"#2B2B52",
@@ -68,13 +78,15 @@ export default StyleSheet.create({
   },
   numbers: {
     fontSize: 18,
-    paddingTop: 20,
-    paddingLeft: 20,
+    paddingLeft: 16,
+    marginTop: 15,
   },
   numbersRow: {
-    
+    alignItems: 'flex-start',
+    width: 290
   },
-  numbersBtns: {
-    
-  }
+  numbersRow2: {
+    alignItems: 'flex-end',
+    height: 35
+  },
 });

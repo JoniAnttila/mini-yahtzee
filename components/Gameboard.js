@@ -184,12 +184,12 @@ export default function Gameboard() {
                     onPress={() => throwDices()}>
                     <Text style={styles.buttonText}>Throw dices</Text>
                 </Pressable>
-                <Text style={styles.gameinfo}>Total: {points}</Text>
-                <Text style={styles.gameinfo}>
+                <Text style={styles.gameinfo2}>Total: {points}</Text>
+                <Text style={styles.gameinfo1}>
                     {(WINNING_POINTS > points ? 'You are ' + BONUS + ' points away from bonus' : 'You got the bonus!')}
                 </Text>
 
-                <Row style={styles.numbersRow}>
+                <Row style={styles.numbersRow2}>
                     {
                         values.map((item) => (
                         <Col>
@@ -198,14 +198,14 @@ export default function Gameboard() {
                         ))
                     }
                 </Row>
-                <Row>
+                <Row style={styles.numbersRow}>
                     {
                         options.map((item, index) => (
                         <Col>
-                            <Pressable style={styles.numbersBtns} disabled={isDisabled} key={item.value} onPress={() => calculatePoints(item.value, index)}>
+                            <Pressable style={styles.flex} disabled={isDisabled} key={index} onPress={() => calculatePoints(item.value, index)}>
                                 <MaterialCommunityIcons
                                     name={item.label}
-                                    key={item.value}
+                                    key={index}
                                     size={50}
                                     color={selectedCount[index] ? "black" : "steelblue"}>
                                 </MaterialCommunityIcons>
