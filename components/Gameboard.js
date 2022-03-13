@@ -7,61 +7,24 @@ import { Col, Row, Grid } from "react-native-easy-grid";
 let board = [];
 const NBR_OF_DICES = 5;
 const NBR_OF_THROWS = 3;
-const NBR_OF_TURNS = 6;
 const WINNING_POINTS = 63;
 
 const options = [
-    {
-        label: 'numeric-1-circle',
-        value: 'dice-1'
-    },
-    {
-        label: 'numeric-2-circle',
-        value: 'dice-2'
-    },
-    {
-        label: 'numeric-3-circle',
-        value: 'dice-3'
-    },
-    {
-        label: 'numeric-4-circle',
-        value: 'dice-4'
-    },
-    {
-        label: 'numeric-5-circle',
-        value: 'dice-5'
-    },
-    {
-        label: 'numeric-6-circle',
-        value: 'dice-6'
-    }
+    {label: 'numeric-1-circle', value: 'dice-1'},
+    {label: 'numeric-2-circle', value: 'dice-2'},
+    {label: 'numeric-3-circle', value: 'dice-3'},
+    {label: 'numeric-4-circle', value: 'dice-4'},
+    {label: 'numeric-5-circle', value: 'dice-5'},
+    {label: 'numeric-6-circle', value: 'dice-6'}
   ]
 
 const values = [
-    {
-        label: '1',
-        value: 0
-    },
-    {
-        label: '2',
-        value: 0
-    },
-    {
-        label: '3',
-        value: 0
-    },
-    {
-        label: '4',
-        value: 0
-    },
-    {
-        label: '5',
-        value: 0
-    },
-    {
-        label: '6',
-        value: 0
-    }
+    {id: 'dice-1', value: 0},
+    {id: 'dice-2', value: 0},
+    {id: 'dice-3', value: 0},
+    {id: 'dice-4', value: 0},
+    {id: 'dice-5', value: 0},
+    {id: 'dice-6', value: 0}
   ]
 
 export default function Gameboard() {
@@ -70,20 +33,23 @@ export default function Gameboard() {
     let BONUS = WINNING_POINTS - points;
     const [status, setStatus] = useState('');
     const [isDisabled, setIsDisabled] = useState(false);
+    const [diceDisable, setDiceDisable] = useState(false);
     const [selectedDices, setSelectedDices] = 
         useState(new Array(NBR_OF_DICES).fill(false));
-
+    const [selectedCount, setSelectedCount] = 
+        useState(new Array(6).fill(false));
     const row = [];
     for (let i = 0; i < NBR_OF_DICES; i++) {
         row.push(
             <Pressable
                     key={"row" + i}
+                    disabled={diceDisable}
                     onPress={() => selectDice(i)}>
                 <MaterialCommunityIcons
                     name={board[i]}
                     key={"row" + i}
                     size={50}
-                    color={getDiceColor(i)}>
+                    color={selectedDices[i] ? "black" : "steelblue"}>
                 </MaterialCommunityIcons>
             </Pressable>
         )
@@ -96,19 +62,17 @@ export default function Gameboard() {
         }
         if (nbrOfThrowsLeft < 0) {
             setNbrOfThrowsLeft(NBR_OF_THROWS-1);
+            setIsDisabled(false);
+        }
+        if (nbrOfThrowsLeft == 0) {
+            setDiceDisable(true);
+            setStatus('Select your points');
+        } else {
+            setDiceDisable(false);
         }
         
         
     }, [nbrOfThrowsLeft]);
-
-    function getDiceColor(i) {
-        if (board.every((val, i, arr) => val === arr[0])) {
-            return "orange";
-        }
-        else {
-            return selectedDices[i] ? "black" : "steelblue";
-        }
-    }
 
     function selectDice(i) {
         let dices = [...selectedDices];
@@ -117,10 +81,23 @@ export default function Gameboard() {
     }
   
     function throwDices() {
-        /* if (nbrOfThrowsLeft === 0) {
+        if (status === 'Select your points' || status === 'Select your points before next throw') {
             setStatus('Select your points before next throw');
             return;
-        } */
+        }
+        if (status === 'Game over. All points selected.') {
+            for (let i = 1; i <= values.length; i++) {
+                let valueI = 'dice-' + i;
+                const index = values.findIndex(obj => {
+                    return obj.id === valueI;
+                });
+                values[index].value = 0;
+            }
+            
+            setPoints(0);
+            setSelectedCount(new Array(6).fill(false));
+        }
+
         for (let i = 0; i < NBR_OF_DICES; i++) {
             if (!selectedDices[i]) {
                 let randomNumber = Math.floor(Math.random() * 6 + 1);
@@ -131,62 +108,70 @@ export default function Gameboard() {
     }
 
     function checkWinner() {
-        if (board.every((val, i, arr) => val === arr[0]) && nbrOfThrowsLeft > 0) {
-            setStatus('You won');
-        }
-        else if (board.every((val, i, arr) => val === arr[0]) && nbrOfThrowsLeft === 0) {
-            setStatus('You won, game over');
-            setSelectedDices(new Array(NBR_OF_DICES).fill(false));
-        }
-        else if (nbrOfThrowsLeft === 0) {
-            setStatus('Game over');
-            setSelectedDices(new Array(NBR_OF_DICES).fill(false));
-        } 
-        else {
-            setStatus('Select and throw dices again');
-        }
+      if (nbrOfThrowsLeft === 0) {
+        setSelectedDices(new Array(NBR_OF_DICES).fill(false));
+      } 
+      else {
+          setStatus('Select and throw dices again');
+      }
     }
 
-    function calculatePoints(spotCount) {
-        setIsDisabled(true);
+    function calculatePoints(spotCount, i) {
         if (nbrOfThrowsLeft > 0) {
             setStatus('Throw 3 times before setting points');
             return;
         }
+        if (selectedCount[i] == true){
+            let alreadySelected = i + 1;
+            setStatus('You have already selected points for ' + alreadySelected);
+            return;
+        }
+        setIsDisabled(true);
+
+        let end = 0;
+        for (let i = 0; i < 6; i++) {
+            if (selectedCount[i] == true) {
+                end ++;
+            }
+        }
+        if (end == 5) {
+            setStatus('Game over. All points selected.');
+            let end = 0;
+        } else {
+            setStatus('Points added. Throw dices');
+        }
+        
+        let counts = [...selectedCount];
+        counts[i] = selectedCount[i] ? false : true;
+        setSelectedCount(counts);
+
         let kerroin = 0;
         for (let i = 0; i < 6; i++) {
             if (board[i] == spotCount) {
                 kerroin ++;
-                console.log('kerroin', kerroin, i)
-
             }
         }
-
+        const index = values.findIndex(obj => {
+            return obj.id === spotCount;
+        });
+        let spotValue = 0;
         if (spotCount == 'dice-1') {
-            let spotValue = 1;
-            setPoints(points + kerroin * spotValue);
-            return;
+            spotValue = 1;
         } else if (spotCount == 'dice-2') {
-            let spotValue = 2;
-            setPoints(points + kerroin * spotValue);
-            return;
+            spotValue = 2;
         } else if (spotCount == 'dice-3') {
-            let spotValue = 3;
-            setPoints(points + kerroin * spotValue);
-            return;
+            spotValue = 3;
         } else if (spotCount == 'dice-4') {
-            let spotValue = 4;
-            setPoints(points + kerroin * spotValue);
-            return;
+            spotValue = 4;
         } else if (spotCount == 'dice-5') {
-            let spotValue = 5;
-            setPoints(points + kerroin * spotValue);
-            return;
+            spotValue = 5;
         } else {
-            let spotValue = 6;
-            setPoints(points + kerroin * spotValue);
-            return;
+            spotValue = 6;
         }
+
+        let result = kerroin * spotValue;
+        setPoints(points + result);
+        values[index].value = result;
     }
     return(
         <Grid style={styles.gameboard}>
@@ -208,22 +193,21 @@ export default function Gameboard() {
                     {
                         values.map((item) => (
                         <Col>
-                            <Text style={styles.numbers}>{item.value}</Text>
+                            <Text key={item.id} style={styles.numbers}>{item.value}</Text>
                         </Col>
                         ))
                     }
                 </Row>
-                
-                <Row style={styles.numbersRow}>
+                <Row>
                     {
-                        options.map((item) => (
+                        options.map((item, index) => (
                         <Col>
-                            <Pressable disabled={isDisabled} key={item.value} onPress={() => calculatePoints(item.value)}>
+                            <Pressable style={styles.numbersBtns} disabled={isDisabled} key={item.value} onPress={() => calculatePoints(item.value, index)}>
                                 <MaterialCommunityIcons
                                     name={item.label}
                                     key={item.value}
                                     size={50}
-                                    color={(isDisabled ? 'black' : 'steelblue')}>
+                                    color={selectedCount[index] ? "black" : "steelblue"}>
                                 </MaterialCommunityIcons>
                             </Pressable>
                         </Col>

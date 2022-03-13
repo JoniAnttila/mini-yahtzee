@@ -49,6 +49,7 @@ export default StyleSheet.create({
     padding: 10
   },
   flex: {
+    marginTop: 40,
     flexDirection: "row"
   },
   button: {
@@ -67,10 +68,13 @@ export default StyleSheet.create({
   },
   numbers: {
     fontSize: 18,
-    marginHorizontal: 20,
-    paddingTop: 20
+    paddingTop: 20,
+    paddingLeft: 20,
   },
   numbersRow: {
-    marginVertical: 0,
+    
   },
+  numbersBtns: {
+    
+  }
 });
